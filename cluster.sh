@@ -33,6 +33,12 @@ NET
    apply_cluster   $WORKING_DIR/keycloak.yaml
 }
 
+function install_docker {
+   sudo apt-get update
+   sudo apt-get install docker.io
+   sudo systemctl enable docker
+   sudo systemctl start docker
+}
 
 function global_install {
    if [[ $(kubectl get ns lbns)  ]]; then
@@ -47,6 +53,10 @@ function global_install {
 
 function install_cluster_packages {
 
+  echo "===== Installing Docker ====="
+  install_docker
+  echo "===== Docker Installed ====="
+
   echo "===== Installing Kuberenetes ====="
   install_kubernetes
   echo "===== Kubernetes installed ====="
@@ -55,17 +65,17 @@ function install_cluster_packages {
   install_calico
   echo "===== Calico Installed ====="
 
-  wget https://github.com/hairyhenderson/gomplate/releases/download/v3.11.2/gomplate_linux-amd64
+  sudo wget https://github.com/hairyhenderson/gomplate/releases/download/v3.11.2/gomplate_linux-amd64
   sudo mv gomplate_linux-amd64 /usr/local/bin/gomplate
   sudo chmod +x /usr/local/bin/gomplate
   sudo apt-get install jq
   kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.9.1/cert-manager.yaml
-  apply_cluster -f ./controllers/kncc.yaml
+  apply_cluster ./controllers/kncc.yaml
 
    #Create cluster wide issure
    openssl req -x509 -sha256 -nodes -days 3650 -newkey rsa:2048 -subj '/O=myorg/CN=myorg' -keyout ca.key -out ca.crt
    kubectl create secret tls my-ca --key ca.key --cert ca.crt -n cert-manager
-   apply_cluster   ./certs/clusterissuer.yaml
+   apply_cluster ./certs/clusterissuer.yaml
 }
 
 function install_kubernetes {
