@@ -49,54 +49,12 @@ function install_docker {
    sudo systemctl start docker
 }
 
-function global_install {
-   if [[ $(kubectl get ns lbns)  ]]; then
-      echo "Namespace lbns exists"
-   else
-      kubectl create ns lbns
-      echo "Namespace lbns created"
-   fi
-   helm install istio-ingressgateway-lb -n lbns istio/gateway
-}
-
-
-function install_cluster_packages {
-
-  echo "===== Installing Docker ====="
-  #install_docker
-  echo "===== Docker Installed ====="
-
-  echo "===== Installing Kuberenetes ====="
-  #install_kubernetes
-  echo "===== Kubernetes installed ====="
-  #sudo sleep 25
-  echo "===== Installing Calico ====="
-  #install_calico
-  echo "===== Calico Installed ====="
-  #sudo sleep 25
-  install_yq_locally
-  sudo wget https://github.com/hairyhenderson/gomplate/releases/download/v3.11.2/gomplate_linux-amd64
-  sudo mv gomplate_linux-amd64 /usr/local/bin/gomplate
-  sudo chmod +x /usr/local/bin/gomplate
-  sudo apt-get install jq
-  kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.9.1/cert-manager.yaml
-  apply_cluster ./demo/controllers/kncc.yaml
-
-   #Create cluster wide issure
-   sudo openssl req -x509 -sha256 -nodes -days 3650 -newkey rsa:2048 -subj '/O=myorg/CN=myorg' -keyout ca.key -out ca.crt
-   sudo kubectl create secret tls my-ca --key ca.key --cert ca.crt -n cert-manager
-   apply_cluster ./demo/certs/clusterissuer.yaml
-}
-
-
-function install_metallb {
-
-kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.7/config/manifests/metallb-native.yaml
+function configure_metallb {
 
 read -p 'IPAddr1: ' ipAddr1
 read -p 'IPAddr2: ' ipAddr2
 
-cat << NET > ipaddresspool1.yaml
+   cat << NET > ipaddresspool1.yaml
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
@@ -122,11 +80,53 @@ NET
 kubectl apply -f ipaddresspool1.yaml
 sudo sleep 5
 kubectl apply -f l2advertisement.yaml
+}
 
+function global_install {
+   if [[ $(kubectl get ns lbns)  ]]; then
+      echo "Namespace lbns exists"
+   else
+      kubectl create ns lbns
+      echo "Namespace lbns created"
+   fi
+
+   echo "===== Installing Helm ====="
+   sudo curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+   bash get_helm.sh -v v3.2.4
+   echo "===== Helm installed ====="
+
+   helm repo add istio https://istio-release.storage.googleapis.com/charts
+   helm repo update
+   helm install istio-ingressgateway-lb -n lbns istio/gateway
+
+   echo "==== Configure Metallb ===="
+   configure_metallb
+   echo "==== Metallb Configured ===="
 }
 
 
+function install_cluster_packages {
 
+  install_yq_locally
+  sudo wget https://github.com/hairyhenderson/gomplate/releases/download/v3.11.2/gomplate_linux-amd64
+  sudo mv gomplate_linux-amd64 /usr/local/bin/gomplate
+  sudo chmod +x /usr/local/bin/gomplate
+  sudo apt-get install jq
+  kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.9.1/cert-manager.yaml
+  apply_cluster ./demo/controllers/kncc.yaml
+
+   #Create cluster wide issure
+   sudo openssl req -x509 -sha256 -nodes -days 3650 -newkey rsa:2048 -subj '/O=myorg/CN=myorg' -keyout ca.key -out ca.crt
+   sudo kubectl create secret tls my-ca --key ca.key --cert ca.crt -n cert-manager
+   apply_cluster ./demo/certs/clusterissuer.yaml
+}
+
+
+function install_metallb {
+
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.7/config/manifests/metallb-native.yaml
+
+}
 
 
 function install_kubernetes {
@@ -202,5 +202,12 @@ case "$1" in
       install_kubernetes;;
       "install_calico" )
       install_calico;;
+      "install_docker" )
+      install_docker;;
+      "configure_metallb" )
+      configure_metallb;;
+      "install_helm" )
+      install_helm
+
 
 esac
