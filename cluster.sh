@@ -18,6 +18,15 @@ function apply_cluster {
     kubectl apply -f $file
 
 }
+function install_yq_locally {
+    if [ ! -x ./yq ]; then
+        echo 'Installing yq locally'
+        VERSION=v4.12.0
+        BINARY=yq_linux_amd64
+        sudo wget https://github.com/mikefarah/yq/releases/download/${VERSION}/${BINARY} -O yq && sudo chmod +x yq
+fi
+}
+
 WORKING_DIR=/tmp
 
 function install_keycloak_idp {
@@ -65,6 +74,7 @@ function install_cluster_packages {
   install_calico
   echo "===== Calico Installed ====="
 
+  install_yq_locally
   sudo wget https://github.com/hairyhenderson/gomplate/releases/download/v3.11.2/gomplate_linux-amd64
   sudo mv gomplate_linux-amd64 /usr/local/bin/gomplate
   sudo chmod +x /usr/local/bin/gomplate
