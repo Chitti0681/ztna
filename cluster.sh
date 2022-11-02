@@ -63,7 +63,7 @@ function global_install {
 function install_cluster_packages {
 
   echo "===== Installing Docker ====="
-  install_docker
+  #install_docker
   echo "===== Docker Installed ====="
 
   echo "===== Installing Kuberenetes ====="
@@ -80,12 +80,12 @@ function install_cluster_packages {
   sudo chmod +x /usr/local/bin/gomplate
   sudo apt-get install jq
   kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.9.1/cert-manager.yaml
-  apply_cluster ./controllers/kncc.yaml
+  apply_cluster ./demo/controllers/kncc.yaml
 
    #Create cluster wide issure
-   openssl req -x509 -sha256 -nodes -days 3650 -newkey rsa:2048 -subj '/O=myorg/CN=myorg' -keyout ca.key -out ca.crt
-   kubectl create secret tls my-ca --key ca.key --cert ca.crt -n cert-manager
-   apply_cluster ./certs/clusterissuer.yaml
+   sudo openssl req -x509 -sha256 -nodes -days 3650 -newkey rsa:2048 -subj '/O=myorg/CN=myorg' -keyout ca.key -out ca.crt
+   sudo kubectl create secret tls my-ca --key ca.key --cert ca.crt -n cert-manager
+   apply_cluster ./demo/certs/clusterissuer.yaml
 }
 
 function install_kubernetes {
