@@ -1,0 +1,129 @@
+{
+  "realm": "test",
+  "enabled": true,
+  "users": [
+    {
+      "username": "keycloak",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test"
+        }
+      ],
+      "realmRoles": [
+        "user"
+      ]
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "user",
+        "description": "User privileges"
+      },
+      {
+        "name": "admin",
+        "description": "Administrator privileges"
+      }
+    ],
+    "client": {
+      "oauth2-proxy": [
+        {
+          "name": "special",
+          "composite": false,
+          "clientRole": true,
+          "attributes": {}
+        },
+        {
+          "name": "general",
+          "composite": false,
+          "clientRole": true,
+          "attributes": {}
+        }
+      ]
+    }
+  },
+  "clients": [
+    {
+      "clientId": "oauth2-proxy",
+      "enabled": true,
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "lsuaCKsXRCQ0gID8BZHYK8tfAMlxP1cR",
+      "redirectUris": [
+        "",
+        ""
+      ],
+      "webOrigins": [
+        "*"
+      ],
+      "protocolMappers": [
+        {
+          "name": "client roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-client-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "user_type",
+            "jsonType.label": "String",
+            "usermodel.clientRoleMapping.clientId": "oauth2-proxy"
+          }
+        }
+      ]
+    }
+  ],
+  "identityProviders": [
+    {
+      "alias": "KeycloakIDP",
+      "displayName": "",
+      "providerId": "oidc",
+      "enabled": true,
+      "updateProfileFirstLoginMode": "on",
+      "trustEmail": false,
+      "storeToken": false,
+      "addReadTokenRoleOnCreate": false,
+      "authenticateByDefault": false,
+      "linkOnly": false,
+      "firstBrokerLoginFlowAlias": "first broker login",
+      "config": {
+        "validateSignature": "false",
+        "clientId": "idp-client",
+        "tokenUrl": "",
+        "authorizationUrl": "",
+        "clientAuthMethod": "clientAuth_post",
+        "clientSecret": "udRp9HVCrkmhZDIsbUuC5qszCEsuVT5D"
+      }
+    }
+  ],
+  "identityProviderMappers": [
+    {
+      "name": "general",
+      "identityProviderAlias": "KeycloakIDP",
+      "identityProviderMapper": "oidc-advanced-role-idp-mapper",
+      "config": {
+        "claims": "[{\"key\":\"roles\",\"value\":\"worker\"}]",
+        "syncMode": "FORCE",
+        "are.claim.values.regex": "false",
+        "attributes": "[]",
+        "role": "oauth2-proxy.general"
+      }
+    },
+    {
+      "name": "special",
+      "identityProviderAlias": "KeycloakIDP",
+      "identityProviderMapper": "oidc-advanced-role-idp-mapper",
+      "config": {
+        "claims": "[{\"key\":\"roles\",\"value\":\"manager\"}]",
+        "syncMode": "FORCE",
+        "are.claim.values.regex": "false",
+        "attributes": "[]",
+        "role": "oauth2-proxy.special"
+      }
+    }
+  ]
+}

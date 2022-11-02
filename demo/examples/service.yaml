@@ -1,0 +1,5 @@
+name: app1
+host: app1.internalcustomer1.com
+port: 31166
+internal: 8000
+address: 240.0.0.2

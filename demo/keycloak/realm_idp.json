@@ -1,0 +1,133 @@
+{
+  "realm": "users",
+  "enabled": true,
+  "users": [
+    {
+      "username": "alice",
+      "email": "alice@test.com",
+      "firstName": "alice",
+      "lastName": "alice",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test"
+        }
+      ],
+      "realmRoles": [
+        "user"
+      ],
+      "clientRoles": {
+        "idp-client": [
+          "worker"
+        ]
+      }
+    },
+    {
+      "username": "bob",
+      "email": "bob@test.com",
+      "firstName": "bob",
+      "lastName": "bob",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test"
+        }
+      ],
+      "realmRoles": [
+        "user"
+      ],
+      "clientRoles": {
+        "idp-client": [
+          "worker"
+        ]
+      }
+    },
+    {
+      "username": "andrew",
+      "email": "andrew@test.com",
+      "firstName": "andrew",
+      "lastName": "andrew",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test"
+        }
+      ],
+      "realmRoles": [
+        "admin"
+      ],
+      "clientRoles": {
+        "idp-client": [
+          "manager"
+        ]
+      }
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "user",
+        "description": "User privileges"
+      },
+      {
+        "name": "admin",
+        "description": "Administrator privileges"
+      }
+    ],
+    "client": {
+      "idp-client": [
+        {
+          "name": "manager",
+          "composite": false,
+          "clientRole": true,
+          "attributes": {}
+        },
+        {
+          "name": "worker",
+          "composite": false,
+          "clientRole": true,
+          "attributes": {}
+        }
+      ]
+    }
+  },
+  "clients": [
+    {
+      "clientId": "idp-client",
+      "enabled": true,
+      "publicClient": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "udRp9HVCrkmhZDIsbUuC5qszCEsuVT5D",
+      "redirectUris": [
+        "*"
+      ],
+      "webOrigins": [
+        "*"
+      ],
+      "protocolMappers": [
+        {
+          "name": "Role",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-client-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "roles",
+            "jsonType.label": "String",
+            "usermodel.clientRoleMapping.clientId": "idp-client"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: {{ strings.Quote (datasource "data").name }}
+spec:
+  hosts:
+    # DNS name selected for the service
+    - {{ strings.Quote (datasource "data").destinationHost }}
+  location: MESH_INTERNAL
+  ports:
+    - name: tcp
+      number: {{ (datasource "data").destinationHostPortInternal }}
+      protocol: TCP
+  resolution: DNS
+  addresses:
+    - {{ (datasource "data").address }}
+  endpoints:
+    - address: {{ strings.Quote (datasource "data").destinationHost }}
+      ports:
+        tcp: {{ (datasource "data").destinationHostPort }}
+
