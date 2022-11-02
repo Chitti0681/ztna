@@ -67,13 +67,13 @@ function install_cluster_packages {
   echo "===== Docker Installed ====="
 
   echo "===== Installing Kuberenetes ====="
-  install_kubernetes
+  #install_kubernetes
   echo "===== Kubernetes installed ====="
-  sudo sleep 25
+  #sudo sleep 25
   echo "===== Installing Calico ====="
-  install_calico
+  #install_calico
   echo "===== Calico Installed ====="
-  sudo sleep 25
+  #sudo sleep 25
   install_yq_locally
   sudo wget https://github.com/hairyhenderson/gomplate/releases/download/v3.11.2/gomplate_linux-amd64
   sudo mv gomplate_linux-amd64 /usr/local/bin/gomplate
@@ -159,9 +159,8 @@ function install_kubernetes {
    sudo systemctl daemon-reload
    sudo sleep 5
    sudo apt-get upgrade -y
-   apiserver_advertise_address=$(ip addr show dev "$(awk '$2 == 00000000 { print $1 }' /proc/net/route)" | awk '$1 == "inet" { sub("/.*", "", $2); print $2 }')
 
-   sudo kubeadm init --node-name=$node_name --kubernetes-version=$kubernetes_version --pod-network-cidr=$pod_network_cidr --apiserver-advertise-address=$apiserver_advertise_address
+   sudo kubeadm init --node-name=$node_name --kubernetes-version=$kubernetes_version --pod-network-cidr=$pod_network_cidr
    sudo sleep 5
 
    sudo mkdir -p $HOME/.kube
@@ -172,15 +171,9 @@ function install_kubernetes {
    export KUBECONFIG=$HOME/.kube/config
    sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
-   # sudo chown -R $USER $HOME/.kube
-
    echo "get nodes"
 
    kubectl get node
-
-   # echo "install flannel"
-
-   # kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 
    sudo sleep 5
 
