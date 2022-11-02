@@ -69,11 +69,11 @@ function install_cluster_packages {
   echo "===== Installing Kuberenetes ====="
   install_kubernetes
   echo "===== Kubernetes installed ====="
-
+  sudo sleep 25
   echo "===== Installing Calico ====="
   install_calico
   echo "===== Calico Installed ====="
-
+  sudo sleep 25
   install_yq_locally
   sudo wget https://github.com/hairyhenderson/gomplate/releases/download/v3.11.2/gomplate_linux-amd64
   sudo mv gomplate_linux-amd64 /usr/local/bin/gomplate
@@ -87,6 +87,47 @@ function install_cluster_packages {
    sudo kubectl create secret tls my-ca --key ca.key --cert ca.crt -n cert-manager
    apply_cluster ./demo/certs/clusterissuer.yaml
 }
+
+
+function install_metallb {
+
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.7/config/manifests/metallb-native.yaml
+
+read -p 'IPAddr1: ' ipAddr1
+read -p 'IPAddr2: ' ipAddr2
+
+cat << NET > ipaddresspool1.yaml
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: first-pool
+  namespace: metallb-system
+spec:
+  addresses:
+  - $ipAddr1-$ipAddr2
+
+NET
+
+cat << NET > l2advertisement.yaml
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: example
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+  - first-pool
+NET
+
+kubectl apply -f ipaddresspool1.yaml
+sudo sleep 5
+kubectl apply -f l2advertisement.yaml
+
+}
+
+
+
+
 
 function install_kubernetes {
    kubernetes_version="1.23.1"
@@ -154,6 +195,7 @@ function install_calico {
 
 }
 
+
 case "$1" in
      "prepare" )
         global_install;;
@@ -161,4 +203,11 @@ case "$1" in
         install_cluster_packages;;
       "keycloak_idp" )
       install_keycloak_idp;;
+      "install_metallb" )
+      install_metallb;;
+      "install_kubernetes" )
+      install_kubernetes;;
+      "install_calico" )
+      install_calico;;
+
 esac
